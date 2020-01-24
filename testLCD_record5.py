@@ -115,17 +115,34 @@ fs = 16000
 channel = 1
 counter = 0
 size = 2**13
+#size = 9600
+#size = 4000
 NUMERATOR, DENOMINATOR = spl.A_weighting(fs)
+audio = pyaudio.PyAudio()
+
+def adCallback(in_data, frame_count, time_info, status):
+    data.append(in_data)
+    global buf
+    buf = np.frombuffer(in_data, dtype = "int16")/32768.0
+    return(None, pyaudio.paContinue)
+
+stream = audio.open(format = pyaudio.paInt16,
+                    channels = int(channel),
+                    rate = int(fs),
+                    input = True,
+                    #frames_per_buffer = size,
+                    frames_per_buffer = size)
+                    #stream_callback = adCallback)
 
 def listen(old=0, error_count=0, min_decibel=100, max_decibel=0):
     #print("Listening")
     #while True:
         try:
             ## read() returns string. You need to decode it into an array later.
-            block = stream.read(size)
+            block = stream.read(size, exception_on_overflow = False)
         except IOError as e:
             error_count += 1
-            print(" (%d) Error recording: %s" % (error_count, e))
+            print(" (%d) Error type is: %s" % (error_count, e))
         else:
             ## Int16 is a numpy data type which is Integer (-32768 to 32767)
             ## If you put Int8 or Int32, the result numbers will be ridiculous
@@ -139,7 +156,7 @@ def listen(old=0, error_count=0, min_decibel=100, max_decibel=0):
                 #update_text(SINGLE_DECIBEL_FILE_PATH, '{:.2f} dBA'.format(new_decibel))
                 #max_decibel = update_max_if_new_is_larger_than_max(new_decibel, max_decibel)
                 #click('update_decibel')
-                return new_decibel
+                return round(new_decibel, 1)
 
     #stream.stop_stream()
     #stream.close()
@@ -169,27 +186,13 @@ def rmscalic(sound):
     #### calc rms ####
     rmslevel = np.round(20*np.log10(np.sqrt(np.mean((np.square(data_dummy))))), 1)
 
-def adCallback(in_data, frame_count, time_info, status):
-    data.append(in_data)
-    global buf
-    buf = np.frombuffer(in_data, dtype = "int16")/32768.0
-    return(None, pyaudio.paContinue)
-
 if __name__ == '__main__':
     executor = cf.ThreadPoolExecutor(max_workers = 4)
-    audio = pyaudio.PyAudio()
-
-    stream = audio.open(format = pyaudio.paInt16,
-                        channels = int(channel),
-                        rate = int(fs),
-                        input = True,
-                        frames_per_buffer = size,
-                        stream_callback = adCallback)
 
     data = []
     buf = []
 
-    stream.start_stream()
+    #stream.start_stream()
     print("Recording.")
     time.sleep(1)
     
@@ -205,14 +208,16 @@ if __name__ == '__main__':
     #spl_meter_text.listen()
     while 1:
         executor.submit(command(LCD_2ndline)) # display at 2nd line of display
-        print(listen())
+        #print(listen())
+
         #print(spl_meter_text.listen())
         #listen()
-        executor.submit(rmscalic(buf)) # display at 2nd line of display
+       # executor.submit(rmscalic(buf)) # display at 2nd line of display
         #res = subprocess.check_output(['vcgencmd','measure_temp'])
         #print(str(rmslevel) + " dB") # display rms level on big display
         #print(str(rmscalic(buf)) + " dB") # display rms level on big display
-        executor.submit(writeLCD(str(rmslevel)+' dB')) # display rms level on small display
+        #executor.submit(writeLCD(str(rmslevel)+' dB')) # display rms level on small display
+        executor.submit(writeLCD(str(listen())+'dBA')) # display rms level on small display
         time.sleep(0.5)
         if (GPIO.event_detected(resetPin)):
             break
