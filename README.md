@@ -1,42 +1,14 @@
-# Raspberry Pi SPL meter
-* Sound Pressur Level meter with RPI implemented with Python.
-* Author: Seyoung Park
-* Date: 2016 Feb. 23rd
+amlab_b4
+b4のラズパイのプログラム管理用のリポジトリ
 
-## Demo
+問題点
 
-[![demo](/images/demo.png)](https://youtu.be/jp1AkBDQ-8k)
+･ラズパイのストレージが厳しくなってきており, 追加でパッケージのインストールなどができない可能性が大きい
 
-## Requirements
-### HW
-* Raspberry Pi(1 or 2)
-* Microphone (Webcam)
+･pip updateを実行してから, pipコマンドにおいてmainが見つかりませんというエラーが発生中(pip3では可能)
 
-## Docker
-I made a Docker image for non-gui version.
-```bash
-# Run this command at the project dir
-# Pull the image
-docker pull shinyeyes/rpi-spl-meter:v0.1
+課題
 
-# Enter the container
-docker run -it --privileged -v /dev/bus/usb:/dev/bus/usb shinyeyes/rpi-spl-meter:v0.1
+･spl-meter-with-RPiパッケージを用いて周波数分析や周波数特性重み付けを実装したい(もしくは, サウンドプログラミング演習のプログラムをベースに同じ機能を実装したい)
 
-# Run this command in the container
-$HOME/miniconda/envs/spl-meter/bin/python spl_meter_text.py
-```
-
-## GUI version
-### SW
-* Python 2
-* EasyProcess==0.2.2
-* numpy==1.10.4
-* PyAudio==0.2.9
-* PyVirtualDisplay==0.1.5
-* scipy==0.17.0
-* selenium==2.52.0
-* wheel==0.24.0
-
-## Filter: A-weighting
-I applied A-weighting to filter to filter the stream. A-weighting results frequencies which average person can hear. For further information read: [Frequency Weightings - A-Weighted, C-Weighted or Z-Weighted?](https://www.noisemeters.com/help/faq/frequency-weighting.asp)
-For the actual programmatic implementation I borrowed the code from [endolith](https://gist.github.com/endolith/148112) and is saved as /spl_lib.py. A-weighting() is translated from [MATLAB script](: http://www.mathworks.com/matlabcentral/fileexchange/69).
+･testLCD_record2.pyからspl-meter-with-RPiの機能を呼び出したい()
