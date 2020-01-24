@@ -9,6 +9,7 @@ import smbus2 as smbus   #for python3
 import subprocess
 import concurrent.futures as cf
 #import matplotlib.pyplot as plt
+import spl_meter_text
 
 #GPIO.cleanup()
 #os.system("cat woman.txt")
