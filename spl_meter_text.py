@@ -102,7 +102,7 @@ def listen(old=0, error_count=0, min_decibel=100, max_decibel=0):
                 #update_text(SINGLE_DECIBEL_FILE_PATH, '{:.2f} dBA'.format(new_decibel))
                 #max_decibel = update_max_if_new_is_larger_than_max(new_decibel, max_decibel)
                 #click('update_decibel')
-
+            return new_decibel
 
     stream.stop_stream()
     stream.close()
