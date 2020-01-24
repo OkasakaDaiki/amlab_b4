@@ -11,4 +11,4 @@ b4のラズパイのプログラム管理用のリポジトリ
 
 ･spl-meter-with-RPiパッケージを用いて周波数分析や周波数特性重み付けを実装したい(もしくは, サウンドプログラミング演習のプログラムをベースに同じ機能を実装したい)
   
-  ･testLCD_record2.pyからspl-meter-with-RPiの機能を呼び出したい
+  ･testLCD_record2.pyからspl-meter-with-RPiの機能を呼び出したい()
