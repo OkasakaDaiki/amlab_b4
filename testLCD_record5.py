@@ -14,32 +14,6 @@ import smbus2 as smbus
 import subprocess
 import concurrent.futures as cf
 
-## For web browser handling
-#from selenium import webdriver
-
-''' The following is similar to a basic CD quality
-   When CHUNK size is 4096 it routinely throws an IOError.
-   When it is set to 8192 it doesn't.
-   IOError happens due to the small CHUNK size
-
-   What is CHUNK? Let's say CHUNK = 4096
-   math.pow(2, 12) => RATE / CHUNK = 100ms = 0.1 sec
-'''
-CHUNKS = [4096, 9600]       # Use what you need
-CHUNK = CHUNKS[1]
-CHUNK = 2**13
-FORMAT = pyaudio.paInt16    # 16 bit
-CHANNEL = 1    # 1 means mono. If stereo, put 2
-
-'''
-Different mics have different rates.
-For example, Logitech HD 720p has rate 48000Hz
-'''
-RATES = [44300, 48000, 16000]
-RATE = RATES[2]
-
-NUMERATOR, DENOMINATOR = spl.A_weighting(RATE)
-
 def get_path(base, tail, head=''):
     return os.path.join(base, tail) if head == '' else get_path(head, get_path(base, tail)[1:])
 
@@ -51,14 +25,6 @@ MAX_DECIBEL_FILE_PATH = get_path(BASE_DIR, 'decibel_data/max_decibel.txt')
 '''
 Listen to mic
 '''
-pa = pyaudio.PyAudio()
-
-stream = pa.open(format = FORMAT,
-                channels = CHANNEL,
-                rate = RATE,
-                input = True,
-                frames_per_buffer = CHUNK)
-
 
 def is_meaningful(old, new):
     return abs(old - new) > 3
@@ -88,45 +54,6 @@ def update_max_if_new_is_larger_than_max(new, max):
     else:
         return max
 
-
-def listen(old=0, error_count=0, min_decibel=100, max_decibel=0):
-#        pa = pyaudio.PyAudio()
-
-#        stream = pa.open(format = FORMAT,
-#                        channels = CHANNEL,
-#                        rate = RATE,
-#                        input = True,
-#                        frames_per_buffer = CHUNK)
-
-    #print("Listening")
-    while True:
-        try:
-            ## read() returns string. You need to decode it into an array later.
-            block = stream.read(CHUNK)
-        except IOError as e:
-            error_count += 1
-            print(" (%d) Error recording: %s" % (error_count, e))
-        else:
-            ## Int16 is a numpy data type which is Integer (-32768 to 32767)
-            ## If you put Int8 or Int32, the result numbers will be ridiculous
-            decoded_block = numpy.fromstring(block, 'Int16')
-            ## This is where you apply A-weighted filter
-            y = lfilter(NUMERATOR, DENOMINATOR, decoded_block)
-            new_decibel = 20*numpy.log10(spl.rms_flat(y))
-            if is_meaningful(old, new_decibel):
-                old = new_decibel
-                print('A-weighted: {:+.2f} dB'.format(new_decibel))
-                #update_text(SINGLE_DECIBEL_FILE_PATH, '{:.2f} dBA'.format(new_decibel))
-                #max_decibel = update_max_if_new_is_larger_than_max(new_decibel, max_decibel)
-                #click('update_decibel')
-                #return new_decibel
-
-    stream.stop_stream()
-    stream.close()
-    pa.terminate()
-
-#GPIO.cleanup()
-#os.system("cat woman.txt")
 shutdownPin = 6;
 resetPin = 5; 
 
@@ -166,11 +93,6 @@ def shutdown(channel):
 def reboot(channel):
     os.system("sudo reboot")
       
-#while 1:
-#    time.sleep(100)
-      
-#GPIO.cleanup()
-
 def init():
     command(0x38)
     command(0x39)
@@ -192,6 +114,37 @@ writeLCD("RMS: ")
 fs = 16000
 channel = 1
 counter = 0
+size = 2**13
+NUMERATOR, DENOMINATOR = spl.A_weighting(fs)
+
+def listen(old=0, error_count=0, min_decibel=100, max_decibel=0):
+    #print("Listening")
+    #while True:
+        try:
+            ## read() returns string. You need to decode it into an array later.
+            block = stream.read(size)
+        except IOError as e:
+            error_count += 1
+            print(" (%d) Error recording: %s" % (error_count, e))
+        else:
+            ## Int16 is a numpy data type which is Integer (-32768 to 32767)
+            ## If you put Int8 or Int32, the result numbers will be ridiculous
+            decoded_block = numpy.fromstring(block, 'Int16')
+            ## This is where you apply A-weighted filter
+            y = lfilter(NUMERATOR, DENOMINATOR, decoded_block)
+            new_decibel = 20*numpy.log10(spl.rms_flat(y))
+            if is_meaningful(old, new_decibel):
+                old = new_decibel
+                print('A-weighted: {:+.2f} dB'.format(new_decibel))
+                #update_text(SINGLE_DECIBEL_FILE_PATH, '{:.2f} dBA'.format(new_decibel))
+                #max_decibel = update_max_if_new_is_larger_than_max(new_decibel, max_decibel)
+                #click('update_decibel')
+                return new_decibel
+
+    #stream.stop_stream()
+    #stream.close()
+    #pa.terminate()
+
 
 def rmscalic(sound):
     soundSuper = type(sound)
@@ -223,21 +176,20 @@ def adCallback(in_data, frame_count, time_info, status):
     return(None, pyaudio.paContinue)
 
 if __name__ == '__main__':
-    executor = cf.ThreadPoolExecutor(max_workers = 3)
-    size = 2**13
-    #audio = pyaudio.PyAudio()
+    executor = cf.ThreadPoolExecutor(max_workers = 4)
+    audio = pyaudio.PyAudio()
 
-#    stream = audio.open(format = pyaudio.paInt16,
-#                        channels = int(channel),
-#                        rate = int(fs),
-#                        input = True,
-#                        frames_per_buffer = size,
-#                        stream_callback = adCallback)
+    stream = audio.open(format = pyaudio.paInt16,
+                        channels = int(channel),
+                        rate = int(fs),
+                        input = True,
+                        frames_per_buffer = size,
+                        stream_callback = adCallback)
 
     data = []
     buf = []
 
-#    stream.start_stream()
+    stream.start_stream()
     print("Recording.")
     time.sleep(1)
     
@@ -251,16 +203,16 @@ if __name__ == '__main__':
 
     #print(spl_meter_text.listen())
     #spl_meter_text.listen()
-    listen()
     while 1:
         executor.submit(command(LCD_2ndline)) # display at 2nd line of display
+        print(listen())
         #print(spl_meter_text.listen())
         #listen()
-        #executor.submit(rmscalic(buf)) # display at 2nd line of display
+        executor.submit(rmscalic(buf)) # display at 2nd line of display
         #res = subprocess.check_output(['vcgencmd','measure_temp'])
         #print(str(rmslevel) + " dB") # display rms level on big display
         #print(str(rmscalic(buf)) + " dB") # display rms level on big display
-        #executor.submit(writeLCD(str(rmslevel)+' dB')) # display rms level on small display
+        executor.submit(writeLCD(str(rmslevel)+' dB')) # display rms level on small display
         time.sleep(0.5)
         if (GPIO.event_detected(resetPin)):
             break
