@@ -8,8 +8,8 @@ B4用のラズパイである, ホスト名 : amlab･ユーザー : piのホー
 ### 全体の説明
 testLCD_record2~.pyは, MEMSマイクから拾った音圧データにA特性重み付けをしてRMSレベルをラズパイ付属の小型ディスプレイに表示しようとしたものです.  
 ### 各プログラム説明
-testLCD_record2.py : 以前のtestLCD_record2からspl_meter_textのlisten関数を呼び出したものです  
-testLCD_record5.py : spl_meter_textの後ろに, 以前のtestLCD_record2を付け加えたものです(唯一エラーなく動作します)  
+* testLCD_record2.py : 以前のtestLCD_record2からspl_meter_textのlisten関数を呼び出したものです  
+* testLCD_record5.py : spl_meter_textの後ろに, 以前のtestLCD_record2を付け加えたものです(唯一エラーなく動作します)  
 
 ## 問題点
 ### プログラムの問題点
