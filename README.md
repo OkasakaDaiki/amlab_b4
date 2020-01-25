@@ -21,4 +21,5 @@ testLCD_record5.py : spl_meter_textの後ろに, 以前のtestLCD_record2を付�
 spl-meter-with-RPiパッケージを用いて周波数分析や周波数特性重み付けを実装したい(もしくは, サウンドプログラミング演習のプログラムをベースに同じ機能を実装したい)  
 ### 課題詳細
 * testLCD_record5.pyのプログラムは読めていないので, 本当にA特性重み付けがされていることを確認できていない  
-* testLCD_record3.pyで実現したいことは｢spl-meter-with-RPiの機能を呼び出し, RMS計算値を取得して表示させる｣｢｣  
+* testLCD_record3.pyで実現したいことは｢spl-meter-with-RPiの機能を呼び出し, RMS計算値を取得して表示させる｣｢｣ 
+* spl_meter_textはローカルでの変更を反映できていない可能性があります
