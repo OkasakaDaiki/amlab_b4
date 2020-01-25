@@ -5,6 +5,7 @@ B4用のラズパイである, ホスト名 : amlab･ユーザー : piのホー
 元々ホームディレクトリ上にあったtestLCD_record2.pyはこちらに入れました.  
 
 ## プログラム説明
+### 全体の説明
 testLCD_record2~.pyは, MEMSマイクから拾った音圧データにA特性重み付けをしてRMSレベルをラズパイ付属の小型ディスプレイに表示しようとしたものです.  
 ### 各プログラム説明
 testLCD_record2.py : 以前のtestLCD_record2からspl_meter_textのlisten関数を呼び出したものです  
